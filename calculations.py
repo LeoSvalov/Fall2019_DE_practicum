@@ -1,6 +1,6 @@
 import math
-
-
+from methods import *
+from numpy import arange
 
 class Calculations:
 
@@ -31,37 +31,64 @@ class Calculations:
         return (y0 + 2 * x0 - 1) / (math.e ** x0)
 
 
-    
     @staticmethod
-    def compute_by_method(x0, b, n, y0, method_function):
-        x_rows = list()
-        y_rows = list()
-        y = y0
+    def compute_Euler(x0, b, n, y0):
+        x_rows = []
+        y_rows = []
         x = x0
-        step = (b - x0) / n
-        while abs(b - x) >= abs(step):
+        y = y0
+        step = (b - x0)/n
+        step = round(step,4)
+        b = b + 0.01
+        for x in arange(x0, b, step):
             x_rows.append(x)
             y_rows.append(y)
-            try:
-                y = method_function(x, y, step)
-            except OverflowError:
-                y = y0
-            x += step
-        x_rows.append(x)
-        y_rows.append(y)
-        return [x_rows, y_rows]
+            y = y + step * Calculations.function(x,y)
+            x = round(x,2)
 
+
+        return [x_rows, y_rows]
 
     @staticmethod
-    def compute_global_error(x0, b, n, y0, method):
-        method_values = method(x0, b, n, y0)
-        x_rows = method_values[0]
-        y_rows = method_values[1]
-        for i in range(len(x_rows)):
-            y = Calculations.IVP_solution(x_rows[i], x0, y0)
-            y_rows[i] = abs(y_rows[i] - y)
+    def compute_ImprovedEuler(x0, b, n, y0):
+        x_rows = []
+        y_rows = []
+        x = x0
+        y = y0
+        step = (b - x0)/n
+        step = round(step,4)
+        b = b + 0.01
+        for x in arange(x0, b , step):
+            x_rows.append(x)
+            y_rows.append(y)
+            y = y + (step / 2) * (Calculations.function(x, y) + Calculations.function(x + step, y + step * Calculations.function(x, y)))
+            x = round(x,2)
         return [x_rows, y_rows]
+
+    @staticmethod
+    def compute_RungeKutta(x0, b, n, y0):
+        x_rows = []
+        y_rows = []
+        x = x0
+        y = y0
+        step = (b - x0)/n
+        step = round(step,4)
+        b = b + 0.01
+        for x in arange(x0, b, step):
+            x_rows.append(x)
+            y_rows.append(y)
+            k_1 = Calculations.function(x, y)
+            k_2 = Calculations.function(x + step / 2, y + (step / 2) * k_1)
+            k_3 = Calculations.function(x + step / 2, y + (step / 2) * k_2)
+            k_4 = Calculations.function(x + step, y + step * k_3)
+            y = y + (step / 6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+            x = round(x,2)
+            
+
+
+
+        return [x_rows, y_rows]        
 
     @staticmethod
     def IVP_solution(x, x0, y0):
-        return Calculations.particular_sol(x0, y0) * (math.e ** (x)) + 2 * x - 1
+        return Calculations.particular_sol(x0, y0) * (math.e ** (x)) - 2 * x + 1
