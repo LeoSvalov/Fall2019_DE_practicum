@@ -1,15 +1,16 @@
 from calculations import *
 from numpy import arange
+
+# class for calculated local/maximum errors
 class MethodsErrors:
 
-    @staticmethod
-    def compute_local_error(x0, b, n0, n, y0, method):
+    # local error computation
+    def compute_local_error(x0, b, n, y0, method):
         method_values = method(x0, b, n, y0)
         exact_values = ExactMethod.get_result(x0,b,n,y0)
         method_ys = method_values[1]
         exact_ys = exact_values[1]
         exact_xs = exact_values[0]
-    
         y_rows = []
         x_rows = []
         for i in range(len(exact_xs)):
@@ -17,28 +18,23 @@ class MethodsErrors:
             x_rows.append(exact_xs[i])
 
         return [x_rows, y_rows]
-        
-    @staticmethod
+    
+    # maximum error computation
     def compute_global_error(x0, b, n0, n, y0, method):
         errors = []
         n_rows = []
         for i in range(int(n0),int(n)+1):
-
             method_values = method(x0,b,i,y0)
             exact_values = ExactMethod.get_result(x0,b,i,y0)
-            exact_ys = exact_values[1]
-            method_ys = method_values[1]
-            y = exact_ys[-1]
-            m_point = method_ys[-1]
-    
+            y = exact_values[1][-1]
+            m_point = method_values[1][-1]
             errors.append(abs(y - m_point))
             n_rows.append(i)
-
         return [n_rows, errors]
 
+# class for the exact method
 class ExactMethod:
 
-    @staticmethod
     def get_result(x0, b, n, y0):
         x = x0
         step = (b - x0) / n
@@ -52,63 +48,63 @@ class ExactMethod:
             x_rows.append(x)
             y_rows.append(y)
             x = round(x,2)
-
         return [x_rows, y_rows]
 
+# class that represents the Euler method
 class EulerMethod:
 
-    @staticmethod
+    # returns approximated values of the method
     def get_result(x0, b, n, y0):
-        return Calculations.compute_Euler(x0, b, n, y0)
-
-    @staticmethod
-    def get_local_error(x0, b, n0, n, y0):
-        return MethodsErrors.compute_local_error(x0, b, n0, n, y0, EulerMethod.get_result)
-
-    @staticmethod
+        return Calculations.compute_by_method(x0, b, n, y0, EulerMethod.formula)
+    
+    # returns local error values of the method
+    def get_local_error(x0, b, n, y0):
+        return MethodsErrors.compute_local_error(x0, b, n, y0, EulerMethod.get_result)
+    
+    # returns maximum error values of the method
     def get_global_error(x0, b, n0, n, y0):
         return MethodsErrors.compute_global_error(x0, b, n0, n, y0, EulerMethod.get_result)   
 
-    @staticmethod 
-    def function(x, y, step):
+    # approach of this method to compute approximated values
+    def formula(x, y, step):
         return y + step * Calculations.function(x, y)
 
-
+# class that represents the Improved Euler method
 class ImprovedEulerMethod:
 
-    @staticmethod
+    # returns approximated values of the method
     def get_result(x0, b, n, y0):
-        return Calculations.compute_ImprovedEuler(x0, b, n, y0)
+        return Calculations.compute_by_method(x0, b, n, y0, ImprovedEulerMethod.formula)
+  
+    # returns local error values of the method
+    def get_local_error(x0, b, n, y0):
+        return MethodsErrors.compute_local_error(x0, b, n, y0, ImprovedEulerMethod.get_result)
 
-    @staticmethod
-    def get_local_error(x0, b, n0, n, y0):
-        return MethodsErrors.compute_local_error(x0, b, n0, n, y0, ImprovedEulerMethod.get_result)
-
-    @staticmethod
+    # returns maximum error values of the method
     def get_global_error(x0, b, n0, n, y0):
         return MethodsErrors.compute_global_error(x0, b, n0, n, y0, ImprovedEulerMethod.get_result)    
 
-    @staticmethod
-    def function(x, y, step):
+    # approach of this method to compute approximated values
+    def formula(x, y, step):
         return y + (step / 2) * (Calculations.function(x, y) + Calculations.function(x + step, y + step * Calculations.function(x, y)))
 
-
+# class that represents the Runge Kutta method
 class RungeKuttaMethod:
 
-    @staticmethod
+    # returns approximated values of the method
     def get_result(x0, b, n, y0):
-        return Calculations.compute_RungeKutta(x0, b, n, y0)
+        return Calculations.compute_by_method(x0, b, n, y0, RungeKuttaMethod.formula)
 
-    @staticmethod
-    def get_local_error(x0, b, n0, n, y0):
-        return MethodsErrors.compute_local_error(x0, b, n0, n, y0, RungeKuttaMethod.get_result)
+    # returns local error values of the method
+    def get_local_error(x0, b, n, y0):
+        return MethodsErrors.compute_local_error(x0, b, n, y0, RungeKuttaMethod.get_result)
 
-    @staticmethod
+    # returns maximum error values of the method
     def get_global_error(x0, b, n0, n, y0):
         return MethodsErrors.compute_global_error(x0, b, n0, n, y0, RungeKuttaMethod.get_result)
-
-    @staticmethod
-    def function(x, y, step):
+    
+    # approach of this method to compute approximated values
+    def formula(x, y, step):
         k_1 = Calculations.function(x, y)
         k_2 = Calculations.function(x + step / 2, y + (step / 2) * k_1)
         k_3 = Calculations.function(x + step / 2, y + (step / 2) * k_2)
