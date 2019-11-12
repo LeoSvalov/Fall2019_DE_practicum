@@ -13,8 +13,14 @@ class MethodsErrors:
         exact_xs = exact_values[0]
         y_rows = []
         x_rows = []
+        y_temp_rows = []
         for i in range(len(exact_xs)):
-            y_rows.append(abs(exact_ys[i] - method_ys[i]))
+            y_temp_rows.append(abs(exact_ys[i] - method_ys[i]))
+        for i in range(len(exact_xs)):
+            if i == 0:
+                y_rows.append(0)
+            else:
+                y_rows.append(y_temp_rows[i] - y_temp_rows[i-1])
             x_rows.append(exact_xs[i])
 
         return [x_rows, y_rows]
